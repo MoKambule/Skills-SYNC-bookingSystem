@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import auth, credentials, firestore
 import pyrebase
+from booking_system import get_available_mentors
 
 
 cred = credentials.Certificate(r"C:\Users\Mokgethwa\Skills-SYNC\skill-sync-19755-firebase-adminsdk-fbsvc-d2ed3fab9b.json")  
@@ -38,8 +39,10 @@ def sign_up():
         db.collection('users').document(user.uid).set({"name":name,
                                                               "email": email,
                                                               "role":role,
-                                                              "expertise":expertise})
-        print("user created")                                                      
+                                                              "expertise":expertise, 
+                                                              "availability":[]
+                                                              })
+        print("user saved")                                                      
     except Exception as e:
         print(f' Error creating user: {e}')
 
@@ -48,6 +51,7 @@ firebase = pyrebase.initialize_app(firebase_configuration)
 auth_client = firebase.auth()
 
 def get_user_data():
+  """Retrieve user data by UID"""  
   while True:
     try:
         user_id= input("enter user id: (uid/exit- to quit)")
@@ -94,7 +98,7 @@ def login():
         user_d = db.collection("users").document(user_id).get()
         if user_d.exists:
                 user_data = user_d.to_dict()
-                print(f' Welcome,')
+                print(f' Welcome, {user_data["name"]}')
                 return {"user_id": user_id, "role": user_data["role"], "email": user_data["email"]}
         else:
             print('user not found')        
@@ -108,8 +112,26 @@ def login():
 
 
 if __name__=="__main__":
-    sign_up()
-    # get_user_data()
-    store_user_data()
-    # login()  
-      
+      while True:
+        print("\n=== Skill Sync Menu ===")
+        print("1. Sign Up")
+        print("2. Login")
+        print("3. Get User Data")
+        print("4. Get Available Mentors")
+        print("5. Exit")
+
+        choice = input("Choose an option (1-5): ").strip()
+
+        if choice == "1":
+            sign_up()
+        elif choice == "2":
+            login()
+        elif choice == "3":
+            get_user_data()
+        elif choice == "4":
+            get_available_mentors()
+        elif choice == "5":
+            print("👋 Goodbye!")
+            break
+        else:
+            print("Invalid option. Please try again.")
